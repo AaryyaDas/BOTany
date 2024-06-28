@@ -2,12 +2,16 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from googletrans import Translator
-import random
+import json
 
 #Initializing the bot
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+
+#Adding the token using config.json
+with open('config.json', 'r') as cfg:
+    data = json.load(cfg)
 
 #Intializing the Google ranslate API
 translator = Translator()
@@ -41,4 +45,4 @@ async def reminder(interaction: discord.Interaction, duration_in_minutes: int, l
     await interaction.followup.send(f"Reminder: {label}")
 
 #Starting the bot
-bot.run(TOKEN)
+bot.run(data["token"])
