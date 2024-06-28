@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 from googletrans import Translator
 import json
+import asyncio
 
 #Initializing the bot
 intents = discord.Intents.default()
