@@ -4,7 +4,7 @@ from discord import app_commands
 from googletrans import Translator
 import json
 import asyncio
-import youtube_dl
+import yt_dlp
 
 #Initializing the bot
 intents = discord.Intents.default()
@@ -49,6 +49,9 @@ async def reminder(interaction: discord.Interaction, duration_in_minutes: int, l
 #Music command
 @bot.tree.command(name="play", description="Play a song/audio clip in a voice channel")
 async def play(interaction: discord.Interaction, query: str, channel_name: str):
+    #Defer the interaction response
+    await interaction.response.defer()
+    
     #Find the voice channel
     channel = discord.utils.get(interaction.guild.voice_channels, name=channel_name)
     if channel is None:
@@ -59,7 +62,7 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
     vc = await channel.connect()
 
     #Time to find video on youtube
-    yld_opts = {
+    ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
@@ -70,7 +73,7 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
     }
     
     #Extracting the details of the search result fetched
-    with youtube_dl.YoutubeDL(ydl_opwts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
         url = info['formats'][0]['url']
         title = info['title']
