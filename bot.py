@@ -4,6 +4,7 @@ from discord import app_commands
 from googletrans import Translator
 import json
 import asyncio
+import youtube_dl
 
 #Initializing the bot
 intents = discord.Intents.default()
@@ -44,6 +45,45 @@ async def reminder(interaction: discord.Interaction, duration_in_minutes: int, l
     await interaction.response.send_message(f"Reminder set for {duration_in_minutes} minutes for: {label}")
     await asyncio.sleep(duration_in_minutes*60)
     await interaction.followup.send(f"Reminder: {label}")
+
+#Music command
+@bot.tree.command(name="play", description="Play a song/audio clip in a voice channel")
+async def play(interaction: discord.Interaction, query: str, channel_name: str):
+    #Find the voice channel
+    channel = discord.utils.get(interaction.guild.voice_channels, name=channel_name)
+    if channel is None:
+        await interaction.response.send_message(f"Voice channel '{channel}' not found.")
+        return
+    
+    #If channel name is valid, connect to channel
+    vc = await channel.connect()
+
+    #Time to find video on youtube
+    yld_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'quiet': True
+    }
+    
+    #Extracting the details of the search result fetched
+    with youtube_dl.YoutubeDL(ydl_opwts) as ydl:
+        info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
+        url = info['formats'][0]['url']
+        title = info['title']
+    
+    await interaction.response.send_message(f"Playing: {title} in {channel_name}")
+
+    #Play the audio
+    vc.play(discord.FFmpegPCMAudio(url))
+    while vc.is_playing():
+        await asyncio.sleep(1)
+    
+    #Disconnect once music is over
+    await vc.disconnect()
 
 #Starting the bot
 bot.run(data["token"])
