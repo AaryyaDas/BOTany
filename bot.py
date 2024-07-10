@@ -55,7 +55,7 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
     #Find the voice channel
     channel = discord.utils.get(interaction.guild.voice_channels, name=channel_name)
     if channel is None:
-        await interaction.response.send_message(f"Voice channel '{channel}' not found.")
+        await interaction.followup.send(f"Voice channel '{channel}' not found.")
         return
     
     #If channel name is valid, connect to channel
@@ -78,7 +78,7 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
         url = info['formats'][0]['url']
         title = info['title']
     
-    await interaction.response.send_message(f"Playing: {title} in {channel_name}")
+    await interaction.followup.send(f"Playing: {title} in {channel_name}")
 
     #Play the audio
     vc.play(discord.FFmpegPCMAudio(url))
