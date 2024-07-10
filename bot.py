@@ -64,29 +64,35 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
     #Time to find video on youtube
     ydl_opts = {
         'format': 'bestaudio/best',
+        'noplaylist': True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'quiet': True
+        'quiet': True,
+        'default_search': 'ytsearch'
     }
-    
-    #Extracting the details of the search result fetched
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
-        url = info['formats'][0]['url']
-        title = info['title']
-    
-    await interaction.followup.send(f"Playing: {title} in {channel_name}")
 
-    #Play the audio
-    vc.play(discord.FFmpegPCMAudio(url))
-    while vc.is_playing():
-        await asyncio.sleep(1)
+    try:
+        #Extracting the details of the search result fetched
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)['entries'][0]
+            url = info['url']
+            title = info['title']
     
-    #Disconnect once music is over
-    await vc.disconnect()
+        await interaction.followup.send(f"Playing: {title} in {channel_name}")
+
+        #Play the audio
+        vc.play(discord.FFmpegPCMAudio(url))
+        while vc.is_playing():
+            await asyncio.sleep(1)
+    
+        #Disconnect once music is over
+        await vc.disconnect()
+    except Exception as e:
+        await interaction.followup.send(f"An error occurred: {e}")
+        await vc.disconnect()
 
 #Starting the bot
 bot.run(data["token"])
