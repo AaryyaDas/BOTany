@@ -94,5 +94,7 @@ async def play(interaction: discord.Interaction, query: str, channel_name: str):
         await interaction.followup.send(f"An error occurred: {e}")
         await vc.disconnect()
 
+
+
 #Starting the bot
 bot.run(data["token"])
